@@ -102,11 +102,23 @@ export default {
         // NEW: Handle the registration logic
         submitRegistration(){
             // Print the collected student info in console for testing
-            console.log("Submitting new student data:", this.newStudent);
+            LoginService.register(this.newStudent)
+            .then(response =>{
+                alert("Registration submitted successsfully!");
+                this.closeCreateModal(); //Close modal after successful submission
+            })
+            .catch(error =>{
+                //Failure: show a message that matches the error
+                if(error.response && error.response.status == 409){
+                    alert("A student with this ID already exists");
+                }else{
+                    alert("Registration failed. Please try again.");
+                }
+                console.error("Registration error:", error);
+            });
             // TODO: Connect to your registration api service here, e.g.:
             // LoginService.register(this.newStudent).then(...).catch(...)
-            alert("Registration submitted successsfully!");
-            this.closeCreateModal(); //Close modal after successful submission
+            
         }
     },
     mounted() {
