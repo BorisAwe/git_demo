@@ -15,9 +15,9 @@
                 </div>
                 <!--Button group to place button side-by-side-->
                 <div class="button-group">
-                    <button type="submit">Button</button>
+                    <button type="submit">Login</button>
                     <!--Changed type to "button" to prevent form auto-submission-->
-                    <button type="button" @click="openCreateModel" class="create-btn">Create</button>
+                    <button type="button" @click="openCreateModal" class="create-btn">Create</button>
                 </div>
             </form>
             <p v-if="message" style="color: red;">{{ message }}</p>
