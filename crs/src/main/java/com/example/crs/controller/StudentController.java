@@ -54,6 +54,28 @@ public class StudentController {
     // TODO: Write your implementation here
     }
 
+    @PostMapping("/remove")
+    public ResponseEntity<?> removeStudent(@RequestBody Student theStudent){
+    	if (theStudent.getStudentId() == null || ((String) theStudent.getStudentId()).trim().isEmpty()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Student ID cannot be empty.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+    	// 1. Check if studentId already exists using studentDatabase.containsKey()
+    	if(studentDatabase.containsKey(theStudent.getStudentId())) {
+    		// 2. If it exists, return ResponseEntity.status(HttpStatus.CONFLICT).body(...)
+    		studentDatabase.remove(theStudent.getStudentId(), theStudent);
+    		Map<String, Object> response = new HashMap<>();
+            response.put("id", theStudent.getStudentId());
+            response.put("name", theStudent.getName());
+            response.put("message", "This student has been successfully removed");
+    		return ResponseEntity.ok(response);
+    	}else {
+    		Map<String, String> error = new HashMap<>();
+            error.put("message", "Student does not exist");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    	}
+    }
     // @PostMapping("/register")
     // public ResponseEntity<?> registerStudent(...) { ... }
     @PostMapping("/register")

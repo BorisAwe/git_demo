@@ -8,5 +8,9 @@ return axios.post(`${API_URL}/login`, credentials);
 register(studentData) {
 return axios.post(`${API_URL}/register`, studentData);
 }
+
+remove(credentials){
+    return axios.post(`${API_URL}/remove`, credentials);
+}
 }
 export default new LoginService();
