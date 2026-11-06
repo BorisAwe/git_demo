@@ -115,6 +115,7 @@ export default {
           console.log(student);
           localStorage.setItem("sid", student.id);
           alert("success");
+          this.$router.push('/helloworld');
         })
         .catch((e) => {
           this.studentLoginRequest.studentId = "";
