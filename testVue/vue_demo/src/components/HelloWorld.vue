@@ -7,24 +7,94 @@
       <button @click="goBack" class="btn">Return to login page</button>
     </div>
     <div class="button-container">
-      <button @click="openApi" class="btn">Open Course Api</button>
+      <button @click="openCoursesApi" class="btn">Open Course Api</button>
+    </div>
+    <div class="button-container">
+      <button @click="fetchCourses" style="padding: 8px 16px; cursor: pointer">
+        Load Courses
+      </button>
+    </div>
+
+    <h2>Course List</h2>
+
+    <!-- Status / Error Message -->
+    <p v-if="statusMessage" class="status-message">{{ statusMessage }}</p>
+
+    <!-- Course Table -->
+    <div v-if="courses.length > 0" class="table-wrapper">
+      <table class="course-table">
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th class="col-code">Course Code</th>
+            <th>Course Title</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="course in courses" :key="course.id">
+            <td class="col-id">#{{ course.id }}</td>
+            <td>
+              <span class="course-badge">{{ course.code }}</span>
+            </td>
+            <td class="course-title">{{ course.title }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="hasSearched">
+      <p>No courses found in the database.</p>
+    </div>
+    <!-- Initial State -->
+    <div v-else>
+      <p>Click the button to load courses.</p>
     </div>
   </div>
 </template>
 <script setup>
 import { useRouter } from "vue-router";
+import { ref } from "vue";
+
 const router = useRouter();
-// Navigate back to login
+
+// Reactive state variables
+const courses = ref([]);
+const loading = ref(false);
+const statusMessage = ref("");
+
 const goBack = () => {
   localStorage.clear();
   router.push("/");
 };
-
-const openApi = () => {
-  localStorage.clear()
-   window.open('http://localhost:8080/api/courses', '_blank');
-}
+const openCourseApi = () => {
+  window.open("http://localhost:8080/api/courses", "_blank");
+};
+const fetchCourses = async () => {
+  loading.value = true;
+  statusMessage.value = "";
+  try {
+    const response = await fetch("http://localhost:8080/api/courses");
+    if (response.status === 204) {
+      courses.value = [];
+      statusMessage.value = "No courses found in the database.";
+      return;
+    }
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const data = await response.json();
+    courses.value = data;
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    statusMessage.value =
+      "Failed to load courses. Please check if the backend is running.";
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
+
 <style scoped>
 .hello-container {
   padding: 40px;
@@ -39,5 +109,103 @@ const openApi = () => {
 .btn {
   padding: 8px 16px;
   cursor: pointer;
+}
+.container {
+  margin: 20px;
+}
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+.course-table th,
+.course-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+.course-table th {
+  background-color: #f2f2f2;
+}
+button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.table-wrapper {
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+}
+
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: system-ui, -apple-system, sans-serif;
+  text-align: left;
+}
+
+.course-table thead {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.course-table th {
+  padding: 14px 18px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #475569;
+}
+
+.course-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.course-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Subtle zebra striping and hover highlight */
+.course-table tbody tr:nth-child(even) {
+  background-color: #fcfdfe;
+}
+
+.course-table tbody tr:hover {
+  background-color: #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.col-id {
+  width: 80px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.col-code {
+  width: 160px;
+}
+
+.course-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.course-title {
+  font-weight: 500;
 }
 </style>
