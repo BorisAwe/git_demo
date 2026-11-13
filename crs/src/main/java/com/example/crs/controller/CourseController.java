@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.crs.model.Course;
 import com.example.crs.model.CourseRepository;
-@CrossOrigin(origins = "http://localhost:8081") // used for vue
+@CrossOrigin(origins = "http://localhost:5173") // used for vue
 @RestController
 @RequestMapping("/api")
 public class CourseController {

@@ -2,25 +2,22 @@
   <div class="hello-container">
     <h1>Hello World! 🎉</h1>
     <p>Congratulations, you have logged in successfully!</p>
+
     <!-- Action buttons container -->
     <div class="button-container">
       <button @click="goBack" class="btn">Return to login page</button>
-    </div>
-    <div class="button-container">
-      <button @click="openCoursesApi" class="btn">Open Course Api</button>
-    </div>
-    <div class="button-container">
-      <button @click="fetchCourses" style="padding: 8px 16px; cursor: pointer">
-        Load Courses
+      <button @click="openCourseApi" class="btn">Open Course Api</button>
+      <button @click="fetchCourses" :disabled="loading" class="btn">
+        {{ loading ? "Loading..." : "Load Courses" }}
       </button>
     </div>
 
     <h2>Course List</h2>
 
-    <!-- Status / Error Message -->
+    <!-- Visible Error / Status Message -->
     <p v-if="statusMessage" class="status-message">{{ statusMessage }}</p>
 
-    <!-- Course Table -->
+    <!-- Modern Course Table -->
     <div v-if="courses.length > 0" class="table-wrapper">
       <table class="course-table">
         <thead>
@@ -43,15 +40,17 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="hasSearched">
+    <div v-else-if="hasSearched && !loading">
       <p>No courses found in the database.</p>
     </div>
+
     <!-- Initial State -->
-    <div v-else>
+    <div v-else-if="!loading">
       <p>Click the button to load courses.</p>
     </div>
   </div>
 </template>
+
 <script setup>
 import { useRouter } from "vue-router";
 import { ref } from "vue";
@@ -62,14 +61,17 @@ const router = useRouter();
 const courses = ref([]);
 const loading = ref(false);
 const statusMessage = ref("");
+const hasSearched = ref(false);
 
 const goBack = () => {
   localStorage.clear();
   router.push("/");
 };
+
 const openCourseApi = () => {
   window.open("http://localhost:8080/api/courses", "_blank");
 };
+
 const fetchCourses = async () => {
   loading.value = true;
   statusMessage.value = "";
@@ -88,9 +90,10 @@ const fetchCourses = async () => {
   } catch (error) {
     console.error("Error fetching courses:", error);
     statusMessage.value =
-      "Failed to load courses. Please check if the backend is running.";
+      "Failed to load courses. Check the browser console (F12) for CORS or network errors.";
   } finally {
     loading.value = false;
+    hasSearched.value = true;
   }
 };
 </script>
@@ -99,6 +102,8 @@ const fetchCourses = async () => {
 .hello-container {
   padding: 40px;
   text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
 }
 .button-container {
   display: flex;
@@ -110,29 +115,11 @@ const fetchCourses = async () => {
   padding: 8px 16px;
   cursor: pointer;
 }
-.container {
-  margin: 20px;
+.status-message {
+  color: #dc2626;
+  font-weight: 600;
+  margin: 12px 0;
 }
-.course-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-.course-table th,
-.course-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-}
-.course-table th {
-  background-color: #f2f2f2;
-}
-button {
-  margin-top: 15px;
-  padding: 8px 16px;
-  cursor: pointer;
-}
-
 .table-wrapper {
   margin-top: 20px;
   border-radius: 10px;
@@ -141,19 +128,16 @@ button {
   border: 1px solid #e2e8f0;
   background-color: #ffffff;
 }
-
 .course-table {
   width: 100%;
   border-collapse: collapse;
   font-family: system-ui, -apple-system, sans-serif;
   text-align: left;
 }
-
 .course-table thead {
   background-color: #f8fafc;
   border-bottom: 2px solid #e2e8f0;
 }
-
 .course-table th {
   padding: 14px 18px;
   font-size: 0.8rem;
@@ -162,38 +146,30 @@ button {
   letter-spacing: 0.05em;
   color: #475569;
 }
-
 .course-table td {
   padding: 14px 18px;
   border-bottom: 1px solid #f1f5f9;
   color: #1e293b;
   font-size: 0.95rem;
 }
-
 .course-table tbody tr:last-child td {
   border-bottom: none;
 }
-
-/* Subtle zebra striping and hover highlight */
 .course-table tbody tr:nth-child(even) {
   background-color: #fcfdfe;
 }
-
 .course-table tbody tr:hover {
   background-color: #f1f5f9;
   transition: background-color 0.15s ease;
 }
-
 .col-id {
   width: 80px;
   color: #64748b;
   font-weight: 500;
 }
-
 .col-code {
   width: 160px;
 }
-
 .course-badge {
   display: inline-block;
   padding: 4px 10px;
@@ -204,7 +180,6 @@ button {
   font-weight: 600;
   font-size: 0.85rem;
 }
-
 .course-title {
   font-weight: 500;
 }
